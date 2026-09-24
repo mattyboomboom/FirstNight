@@ -28,7 +28,7 @@ button{font:inherit;color:inherit}
 .places{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .place{position:absolute;left:0;top:0;white-space:nowrap;font-family:var(--serif);font-size:11.5px;letter-spacing:.06em;color:rgba(239,233,218,.42);text-shadow:0 0 3px var(--night),0 0 6px var(--night)}
 .place.r1,.place.r2{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(239,233,218,.5)}
-.place.r4{font-style:italic;color:rgba(239,233,218,.34)}
+.place.r0{font-style:italic;font-size:12px;letter-spacing:.04em;color:rgba(150,196,220,.6)}
 
 /* The clock: the one loud element */
 #clock{position:fixed;left:clamp(16px,3vw,40px);top:calc(env(safe-area-inset-top,0px) + clamp(12px,2.4vh,28px));z-index:3;pointer-events:none}
@@ -134,3 +134,30 @@ body.page{overflow:auto}
 .page td,.page th{border-bottom:1px solid var(--rule);padding:.45em .5em;text-align:left;vertical-align:top}
 .page th{color:var(--ink-dim);font-weight:600}
 .page .back{font-size:15px;color:var(--ink-dim)}
+
+/* Bomb hits: flash, shockwave and glow (src/map/blasts.ts) */
+.blast{position:absolute;width:0;height:0;pointer-events:none;--s:1}
+.blast i{position:absolute;left:0;top:0;border-radius:50%;transform:translate(-50%,-50%) scale(0);mix-blend-mode:screen}
+.blast .core{width:calc(26px*var(--s));height:calc(26px*var(--s));background:radial-gradient(circle,#fff 0,#fff6d8 25%,#ffc45a 50%,rgba(255,120,30,0) 72%);animation:bl-core .55s cubic-bezier(.2,.9,.3,1) forwards}
+.blast .ring{width:calc(90px*var(--s));height:calc(90px*var(--s));border:calc(2.5px*var(--s)) solid rgba(255,228,180,.95);box-shadow:0 0 calc(10px*var(--s)) rgba(255,160,70,.8),inset 0 0 calc(8px*var(--s)) rgba(255,160,70,.6);animation:bl-ring .9s cubic-bezier(.1,.8,.3,1) forwards}
+.blast .ring.r2{border-width:calc(1.2px*var(--s));animation-delay:.12s;animation-duration:1.2s}
+.blast .glow{width:calc(140px*var(--s));height:calc(140px*var(--s));background:radial-gradient(circle,rgba(255,150,60,.55) 0,rgba(224,68,44,.28) 35%,rgba(224,68,44,0) 70%);animation:bl-glow 1.5s ease-out forwards}
+/* incendiaries: a small sparkling flare, no shockwave */
+.blast.ib .core{width:calc(14px*var(--s));height:calc(14px*var(--s));background:radial-gradient(circle,#fffbe8 0,#ffd57a 35%,rgba(232,169,60,0) 72%);animation-duration:.4s}
+.blast.ib .ring{display:none}
+.blast.ib .glow{width:calc(46px*var(--s));height:calc(46px*var(--s));background:radial-gradient(circle,rgba(232,169,60,.6) 0,rgba(232,169,60,0) 70%);animation:bl-flicker 1.4s ease-out forwards}
+/* crude oil bombs: a slower, violet-edged fireball */
+.blast.oil .glow{background:radial-gradient(circle,rgba(255,140,60,.6) 0,rgba(176,123,224,.3) 40%,rgba(176,123,224,0) 70%)}
+.blast.oil .ring{border-color:rgba(214,180,255,.8)}
+@keyframes bl-core{0%{transform:translate(-50%,-50%) scale(.1);opacity:1}35%{transform:translate(-50%,-50%) scale(1.5);opacity:1}100%{transform:translate(-50%,-50%) scale(.6);opacity:0}}
+@keyframes bl-ring{0%{transform:translate(-50%,-50%) scale(.05);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+@keyframes bl-glow{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}15%{transform:translate(-50%,-50%) scale(.9);opacity:1}100%{transform:translate(-50%,-50%) scale(1.15);opacity:0}}
+@keyframes bl-flicker{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}10%{opacity:1;transform:translate(-50%,-50%) scale(1)}30%{opacity:.55}45%{opacity:.95}65%{opacity:.5}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+
+/* the sky over London lights up as the hits come in */
+#skyglow{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(ellipse 70% 55% at 55% 58%,rgba(255,110,40,.32),rgba(200,60,30,.12) 45%,rgba(0,0,0,0) 75%)}
+#map.shake{animation:shake .28s linear}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(2px,-1px)}40%{transform:translate(-2px,1px)}60%{transform:translate(1px,2px)}80%{transform:translate(-1px,-1px)}}
+@media (prefers-reduced-motion:reduce){#skyglow{display:none}#map.shake{animation:none}}
+#ticks span.end{transform:translateX(-100%)}

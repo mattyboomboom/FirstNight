@@ -5,8 +5,6 @@ id,time,address_as_recorded,reason,geocoded_as,lat,lon
 "44","01:14","66 East Surrey Grove, Peckham SE15","postal district differs","Surrey Grove, Walworth, London Borough of Southwark, Greater London, London, England, SE1 5TY, United Kingdom","51.487497","-0.082727"
 "53","02:49","Prince Edward Road, E9","manual","Placed by hand on Prince Edward Road, Hackney Wick (was geocoded to Basildon).","51.5445","-0.0262"
 "54","03:15","12, Jewell Street, Mile End. E1","district","Mile End, London Borough of Tower Hamlets, London E1, UK","51.526806","-0.039713"
-"61","08:00","7, Devonshire Grove, SE15","postal district differs","Devonshire Grove, New Cross Gate, London Borough of Southwark, Greater London, London, England, SE16, United Kingdom","51.481005","-0.059329"
-"68","12:45","3 Drivers Buildings, Mile End Rd E1","postal district differs","EL's driving school, 38 Southend Ln, London, Greater London SE6 3AA, UK","51.427834","-0.014917"
 "89","17:03","41 Windmill Lane, Deptford, Se8","approx","41 Windmill Lane, Deptford SE8, London, UK","51.4893","-0.0369"
 "92","17:05","Basildon Road, Abbey Wood, SE2","postal district differs","Basildon Road, Abbey Wood, London Borough of Greenwich, Greater London, London, England, SE18, United Kingdom","51.489322","0.107863"
 "96","17:12","The Vicarage, Poplar, E14","postal district differs","The Vicarage, St Peter's Close, London, Greater London E2 7AE, UK","51.530333","-0.064437"

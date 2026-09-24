@@ -4,7 +4,8 @@ import maplibregl, { type GeoJSONSource, type MapGeoJSONFeature } from 'maplibre
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type * as GeoJSON from 'geojson';
 import { lineStyle, placeLabels } from './basemap';
-import { DAY, RAID, TYPES, bins, busiest, clock, dayOf, phase, tally, typeInfo, type BombType, type Incident, type Moment } from './data';
+import { setupBlasts } from './blasts';
+import { SPAN, RAID, TYPES, bins, busiest, clock, dayOf, phase, tally, typeInfo, type BombType, type Incident, type Moment } from './data';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const mapEl = $('map');
@@ -29,7 +30,9 @@ map.touchZoomRotate.disableRotation();
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
 // ---------------------------------------------------------------- state
-let T = DAY - 1; // minute of the day on show
+let T = SPAN; // timeline minute on show (0 = 16:00 Saturday)
+let lastT = T; // for firing blasts as time moves forward
+let blast: ReturnType<typeof setupBlasts> | null = null;
 let playing = false;
 let speed = 12; // map minutes per second
 let selected: number | null = null;
@@ -59,8 +62,23 @@ function render() {
     ['interpolate', ['linear'], age, 0, 1, 30, 0.9, 180, 0.62]] as unknown as maplibregl.ExpressionSpecification);
   map.setPaintProperty('flash', 'circle-opacity', ['interpolate', ['linear'], age, 0, 0.55, 25, 0]);
   map.setPaintProperty('flash', 'circle-radius', ['interpolate', ['linear'], ['zoom'], 10, ['interpolate', ['linear'], age, 0, 16, 25, 5], 15, ['interpolate', ['linear'], age, 0, 40, 25, 12]] as unknown as maplibregl.ExpressionSpecification);
+  fireBlasts();
   updateClock();
   updateHead();
+}
+
+// A flash and blast for every hit the clock passes, while playing or when
+// dragging forward a short way (not when jumping)
+function fireBlasts() {
+  if (blast && !reduceMotion && T > lastT && (playing || T - lastT <= 30)) {
+    for (const i of incidents) {
+      if (i.t > lastT && i.t <= T && shown.has(i.type)) {
+        const f = feats.get(i.id);
+        if (f) blast(f.geometry.coordinates as [number, number], i.type);
+      }
+    }
+  }
+  lastT = T;
 }
 
 // ---------------------------------------------------------------- clock
@@ -78,7 +96,7 @@ function updateClock() {
 // ---------------------------------------------------------------- timeline
 const track = $('track');
 function updateHead() {
-  $('head').style.left = `${(T / (DAY - 1)) * 100}%`;
+  $('head').style.left = `${(T / SPAN) * 100}%`;
   track.setAttribute('aria-valuenow', String(Math.round(T)));
   track.setAttribute('aria-valuetext', clock(T));
 }
@@ -100,20 +118,20 @@ function drawHistogram() {
   });
   svg.innerHTML = html;
   // hour ticks every two hours from 16:00 Saturday; midnight marked as Sunday
-  $('ticks').innerHTML = Array.from({ length: 12 }, (_, k) => k * 120).map((t, k) => {
+  $('ticks').innerHTML = Array.from({ length: SPAN / 120 + 1 }, (_, k) => k * 120).map((t, k) => {
     const lab = clock(t) === '00:00' ? 'Sun 00:00' : clock(t);
-    return `<span class="${k % 3 ? 'minor' : ''}" style="left:${(t / DAY) * 100}%">${lab}</span>`;
+    return `<span class="${k % 2 ? 'minor' : ''}${t === SPAN ? ' end' : ''}" style="left:${(t / SPAN) * 100}%">${lab}</span>`;
   }).join('');
   const marks: (Moment & { busy?: boolean })[] = [...RAID, { ...busiest(incidents), busy: true }];
   $('moments').innerHTML = marks.map((m) =>
-    `<button class="moment${m.busy ? ' busy' : ''}" style="left:${(m.t / DAY) * 100}%" data-t="${m.t}" title="${clock(m.t)} ${m.label}: ${m.detail}" aria-label="${clock(m.t)} ${m.label}"></button>`).join('');
+    `<button class="moment${m.busy ? ' busy' : ''}" style="left:${(m.t / SPAN) * 100}%" data-t="${m.t}" title="${clock(m.t)} ${m.label}: ${m.detail}" aria-label="${clock(m.t)} ${m.label}"></button>`).join('');
   $('moments').querySelectorAll<HTMLButtonElement>('.moment').forEach((b) =>
     b.addEventListener('click', (e) => { e.stopPropagation(); pause(); T = +b.dataset.t!; render(); }));
 }
 
 function scrubTo(clientX: number) {
   const r = track.getBoundingClientRect();
-  T = Math.round(Math.max(0, Math.min(1, (clientX - r.left) / r.width)) * (DAY - 1));
+  T = Math.round(Math.max(0, Math.min(1, (clientX - r.left) / r.width)) * SPAN);
   render();
 }
 track.addEventListener('pointerdown', (e) => {
@@ -128,10 +146,10 @@ track.addEventListener('pointerdown', (e) => {
 });
 track.addEventListener('keydown', (e) => {
   const step = e.shiftKey ? 60 : 10;
-  if (e.key === 'ArrowRight') T = Math.min(DAY - 1, T + step);
+  if (e.key === 'ArrowRight') T = Math.min(SPAN, T + step);
   else if (e.key === 'ArrowLeft') T = Math.max(0, T - step);
   else if (e.key === 'Home') T = 0;
-  else if (e.key === 'End') T = DAY - 1;
+  else if (e.key === 'End') T = SPAN;
   else return;
   e.preventDefault(); pause(); render();
 });
@@ -146,12 +164,13 @@ function frame(now: number) {
   // Hurry through quiet stretches (nothing in the next 20 minutes)
   const quiet = !incidents.some((i) => shown.has(i.type) && i.t > T && i.t <= T + 20);
   T += dt * speed * (quiet ? 6 : 1);
-  if (T >= DAY - 1) { T = DAY - 1; pause(); }
+  if (T >= SPAN) { T = SPAN; pause(); }
   render();
   requestAnimationFrame(frame);
 }
 function play() {
-  if (T >= DAY - 1) T = 0;
+  if (T >= SPAN) T = 0;
+  lastT = T;
   playing = true;
   playBtn.textContent = '❚❚'; playBtn.setAttribute('aria-label', 'Pause'); playBtn.classList.add('on');
   document.body.classList.add('playing');
@@ -256,7 +275,7 @@ map.on('load', async () => {
   incidents = geo.features.map((f) => f.properties).sort((a, b) => a.t - b.t || a.id - b.id);
   geo.features.forEach((f) => feats.set(f.properties.id, f as Feat));
   records = geo.meta.records;
-  $('n-records').textContent = String(records);
+  $('n-records').textContent = String(incidents.length);
 
   map.addSource('incidents', { type: 'geojson', data: geo });
   map.addSource('sel', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
@@ -295,7 +314,8 @@ map.on('load', async () => {
     if (!map.queryRenderedFeatures(e.point, { layers: ['dots', 'dots-ring'] }).length) showIncident(null);
   });
 
-  placeLabels(map, mapEl.dataset.places!);
+  placeLabels(map, mapEl.dataset.places!, geo.features.map((f) => f.geometry.coordinates as [number, number]));
+  blast = setupBlasts(map);
   drawHistogram();
   render();
   document.body.classList.add('ready');

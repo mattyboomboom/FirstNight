@@ -18,7 +18,7 @@ async function shot(name, viewport, act) {
   await page.goto(url);
   await page.waitForSelector('body.ready', { timeout: 30000 });
   if (act) await act(page);
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(name.includes('blasts') ? 150 : 800);
   await page.screenshot({ path: new URL(`${name}.png`, dir).pathname });
   await page.close();
 }
@@ -28,6 +28,10 @@ await shot('desktop-1805-selected', { width: 1440, height: 900 }, (p) =>
   p.evaluate(() => { window.__firstNight.setTime(125); window.__firstNight.select(300, true); }));
 await shot('phone-1805', { width: 390, height: 844 }, (p) => p.evaluate(() => window.__firstNight.setTime(125)));
 await shot('desktop-0030-sunday', { width: 1440, height: 900 }, (p) => p.evaluate(() => window.__firstNight.setTime(510)));
+await shot('desktop-blasts', { width: 1440, height: 900 }, async (p) => {
+  await p.evaluate(() => window.__firstNight.setTime(118));
+  await p.click('#play'); await p.waitForTimeout(250);
+});
 await shot('phone-selected', { width: 390, height: 844 }, (p) => p.evaluate(() => window.__firstNight.select(300, true)));
 await browser.close();
 console.log(errors.length ? `Errors:\n${errors.join('\n')}` : 'No page errors');

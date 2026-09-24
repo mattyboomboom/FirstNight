@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { at, bins, busiest, clock, dayOf, phase, tally, DAY, type Incident } from '../../src/map/data';
+import { SPAN, at, bins, busiest, clock, dayOf, phase, tally, DAY, type Incident } from '../../src/map/data';
 import { bombType, BBOX } from '../../scripts/build-data.mjs';
 
 const geo = JSON.parse(readFileSync(new URL('../../public/data/first-night.geojson', import.meta.url), 'utf8'));
@@ -8,7 +8,7 @@ const inc: Incident[] = geo.features.map((f: { properties: Incident }) => f.prop
 
 describe('built data', () => {
   it('keeps every log entry, mapped or listed as unlocated', () => {
-    expect(geo.features.length + geo.meta.unlocated.length).toBe(geo.meta.records);
+    expect(geo.features.length + geo.meta.unlocated.length + geo.meta.later.length).toBe(geo.meta.records);
     expect(geo.meta.records).toBe(843);
   });
   it('places every point inside Greater London', () => {
@@ -19,7 +19,8 @@ describe('built data', () => {
   });
   it('has valid times and ids', () => {
     expect(new Set(inc.map((i) => i.id)).size).toBe(inc.length);
-    for (const i of inc) expect(i.t >= 0 && i.t < DAY).toBe(true);
+    for (const i of inc) expect(i.t >= 0 && i.t <= SPAN).toBe(true);
+    expect(SPAN).toBe(14 * 60); // 16:00 Saturday to 06:00 Sunday
   });
 });
 
@@ -46,6 +47,7 @@ describe('helpers', () => {
   it('reads early-hours entries as Sunday, after the evening ones', () => {
     const first = inc.find((i) => i.id === 1)!; // 00:08
     const last = inc.find((i) => i.id === 843)!; // 23:59
+    expect(geo.meta.later.map((l: { id: number }) => l.id)).toContain(81); // Arsenal, logged 14:55
     expect(first.day).toBe('Sun 8 Sep');
     expect(first.t).toBeGreaterThan(last.t);
   });

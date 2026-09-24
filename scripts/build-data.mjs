@@ -34,6 +34,11 @@ for (const [k, v] of Object.entries(JSON.parse(readFileSync(src('time-notes.json
   for (let i = a; i <= b; i++) timeNotes.set(i, v);
 }
 const ALL_CLEAR = 4 * 60 + 30; // 04:30 on Sunday 8 September
+// The timeline stops at 06:00 on the Sunday. Later entries (fires and bombs
+// found during the day, and the Arsenal entries logged at 14:55) are kept out
+// of the map and listed in meta.later.
+const END = 6 * 60;
+const later = [];
 const approxOrders = new Set(
   [...readFileSync(src('espinielli-addressesNotFound.txt'), 'utf8').matchAll(/^(\d+):/gm)].map((m) => +m[1])
 );
@@ -94,6 +99,8 @@ rows.forEach((r, i) => {
     borough: null, precision: 'street', check: false
   };
 
+  if (sunday && clockMin >= END) { later.push({ id, time: props.time, address: props.address, type: props.type, damage }); return; }
+
   let lon, lat;
   const fix = fixes[id];
   if (fix) {
@@ -138,7 +145,7 @@ const geo = {
   type: 'FeatureCollection',
   meta: {
     title: 'London Fire Brigade incidents, 7 September 1940',
-    records: rows.length, mapped: features.length, unlocated,
+    records: rows.length, mapped: features.length, unlocated, later,
     built: new Date().toISOString().slice(0, 10)
   },
   features
@@ -148,7 +155,7 @@ writeFileSync(out('first-night.geojson'), JSON.stringify(geo));
 
 const byType = features.reduce((a, f) => ((a[f.properties.type] = (a[f.properties.type] ?? 0) + 1), a), {});
 const count = (p) => features.filter((f) => f.properties.precision === p).length;
-console.log(`first-night: ${features.length}/${rows.length} mapped, ${unlocated.length} unlocated`);
+console.log(`first-night: ${features.length}/${rows.length} mapped, ${unlocated.length} unlocated, ${later.length} after 06:00 Sunday (not mapped)`);
 console.log('  types', byType);
 console.log(`  precision: street ${count('street')}, district ${count('district')}, approx ${count('approx')}, manual ${count('manual')}; postal district mismatches ${features.filter((f) => f.properties.check).length}`);
 

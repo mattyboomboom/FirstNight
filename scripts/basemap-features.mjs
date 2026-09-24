@@ -49,13 +49,19 @@ await each('parks', () => [{}, 10]);
 
 // Place labels: a small file loaded directly, not tiled
 const places = [];
-const rank = { town: 1, suburb: 2, quarter: 3, village: 3, neighbourhood: 4 };
+// Only the main names: towns and suburbs within about 20 km of Charing Cross
+// (neighbourhoods and quarters made the map too busy)
+const rank = { town: 1, suburb: 2 };
+// modern names that didn't exist in 1940
+const MODERN = new Set(['Canary Wharf', 'Docklands', 'Royal Docks', 'Barking Riverside', 'Greenwich Peninsula', 'Kidbrooke Village', 'Nine Elms', 'Queen Elizabeth Olympic Park', 'Hackney Wick']);
+const km = ([lon, lat]) => Math.hypot((lon + 0.1246) * 69.5, (lat - 51.5073) * 111.2);
 const rl = createInterface({ input: createReadStream(`${work}/places.geojsonl`) });
 for await (const line of rl) {
   const f = JSON.parse(line.replace(/^\x1e/, ''));
   const p = f.properties ?? {};
-  if (!p.name || !rank[p.place]) continue;
+  if (!p.name || !rank[p.place] || MODERN.has(p.name)) continue;
   const [lon, lat] = f.geometry.coordinates;
+  if (km([lon, lat]) > 20) continue;
   places.push({ n: p.name, r: rank[p.place], c: [+lon.toFixed(5), +lat.toFixed(5)] });
 }
 places.sort((a, b) => a.r - b.r || a.n.localeCompare(b.n));

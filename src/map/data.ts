@@ -47,12 +47,15 @@ export function clock(t: number): string {
 /** Timeline minute for a clock time on the Saturday (d=0) or Sunday (d=1). */
 export const at = (hh: number, mm: number, d = 0) => d * DAY + hh * 60 + mm - START;
 
+/** Length of the timeline: from 16:00 Saturday to 06:00 Sunday, after the all clear. */
+export const SPAN = at(6, 0, 1);
+
 /** The day on show at timeline minute t. */
 export const dayOf = (t: number) => (t + START >= DAY ? 'Sunday 8 September 1940' : 'Saturday 7 September 1940');
 
 /** Counts per bin (default 10 minutes) and type, for the timeline histogram. */
 export function bins(items: Pick<Incident, 't' | 'type'>[], size = 10): Record<BombType, number>[] {
-  const out = Array.from({ length: Math.ceil(DAY / size) }, () => ({ ib: 0, eb: 0, mixed: 0, cob: 0, other: 0 }));
+  const out = Array.from({ length: Math.ceil(SPAN / size) }, () => ({ ib: 0, eb: 0, mixed: 0, cob: 0, other: 0 }));
   for (const it of items) out[Math.min(out.length - 1, Math.floor(it.t / size))][it.type]++;
   return out;
 }

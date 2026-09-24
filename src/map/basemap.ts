@@ -59,15 +59,34 @@ export function lineStyle(pmtilesUrl: string, historicUrl = ''): StyleSpecificat
 
 interface Place { n: string; r: number; c: [number, number] }
 /** Zoom at which each rank of place (1 town … 4 neighbourhood) is labelled. */
-const SHOW_AT = { 1: 9, 2: 10.6, 3: 12.6, 4: 14 } as Record<number, number>;
+const SHOW_AT = { 0: 12.3, 1: 9, 2: 11 } as Record<number, number>;
+
+/** The docks and the Arsenal: the raid's targets, labelled in their own style (rank 0). */
+const TARGETS: Place[] = [
+  { n: 'Surrey Commercial Docks', r: 0, c: [-0.0395, 51.4975] },
+  { n: 'London Docks', r: 0, c: [-0.0605, 51.5072] },
+  { n: 'St Katharine Docks', r: 0, c: [-0.0712, 51.5068] },
+  { n: 'West India Docks', r: 0, c: [-0.0205, 51.5053] },
+  { n: 'Millwall Docks', r: 0, c: [-0.0170, 51.4960] },
+  { n: 'East India Docks', r: 0, c: [0.0030, 51.5095] },
+  { n: 'Royal Victoria Dock', r: 0, c: [0.0240, 51.5078] },
+  { n: 'Royal Albert Dock', r: 0, c: [0.0600, 51.5075] },
+  { n: 'Royal Arsenal', r: 0, c: [0.0710, 51.4925] }
+];
 
 /**
  * District names as HTML labels (no font server needed). Placed after each
  * move, most important first, skipping any that would overlap.
  */
-export async function placeLabels(map: MLMap, url: string) {
+export async function placeLabels(map: MLMap, url: string, hits: [number, number][] = []) {
   let places: Place[] = [];
-  try { places = await (await fetch(url)).json(); } catch { return; }
+  try { places = await (await fetch(url)).json(); } catch { /* labels are optional */ }
+  // Towns first; then the districts where most bombs fell that night, so the
+  // names that matter to the story win the space; then nearest the centre
+  const km = ([lon, lat]: [number, number], [lon2, lat2] = [-0.1246, 51.5073]) =>
+    Math.hypot((lon - lon2) * 69.5, (lat - lat2) * 111.2);
+  const near = new Map(places.map((p) => [p, hits.filter((h) => km(h, p.c) < 1.2).length]));
+  places = [...TARGETS, ...places.sort((a, b) => a.r - b.r || near.get(b)! - near.get(a)! || km(a.c) - km(b.c))];
   const layer = document.createElement('div');
   layer.className = 'places';
   map.getCanvasContainer().appendChild(layer);
@@ -88,7 +107,9 @@ export async function placeLabels(map: MLMap, url: string) {
       const pt = map.project(p.c);
       if (pt.x < -40 || pt.y < -20 || pt.x > width + 40 || pt.y > height + 20) continue;
       const cw = p.n.length * (p.r <= 2 ? 7.4 : 6.4) + 8, ch = p.r <= 2 ? 16 : 14;
-      const box: [number, number, number, number] = [pt.x - cw / 2, pt.y - ch / 2, pt.x + cw / 2, pt.y + ch / 2];
+      // generous spacing keeps the map uncluttered: fewer, well-spread names
+      const px = p.r === 0 ? 4 : 22, py = p.r === 0 ? 2 : 10;
+      const box: [number, number, number, number] = [pt.x - cw / 2 - px, pt.y - ch / 2 - py, pt.x + cw / 2 + px, pt.y + ch / 2 + py];
       if (box[0] < 2 || box[2] > width - 2 || box[1] < 2 || box[3] > height - 2) continue;
       if (taken.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) continue;
       taken.push(box);
