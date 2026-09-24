@@ -5,7 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type * as GeoJSON from 'geojson';
 import { lineStyle, placeLabels } from './basemap';
 import { setupBlasts } from './blasts';
-import { SPAN, RAID, TYPES, bins, busiest, clock, dayOf, phase, tally, typeInfo, type BombType, type Incident, type Moment } from './data';
+import { BEFORE, SOURCES, SPAN, RAID, TYPES, bins, busiest, clock, dayOf, phase, tally, typeInfo, type BombType, type Incident, type Moment } from './data';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const mapEl = $('map');
@@ -30,7 +30,7 @@ map.touchZoomRotate.disableRotation();
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
 // ---------------------------------------------------------------- state
-let T = SPAN; // timeline minute on show (0 = 16:00 Saturday)
+let T = 0; // timeline minute on show (0 = 16:00 Saturday)
 let lastT = T; // for firing blasts as time moves forward
 let blast: ReturnType<typeof setupBlasts> | null = null;
 let playing = false;
@@ -81,13 +81,29 @@ function fireBlasts() {
   lastT = T;
 }
 
+// ---------------------------------------------------------------- the story so far
+// The stage of the raid is the headline; the time sits under it. The panel
+// tells the stage's story when no incident is open.
+let shownPhase: Moment | null = null;
+const SRC_NAME: Record<string, string> = { lm: 'London Museum', bob: 'Battle of Britain Historical Timeline' };
+function showPhase(ph: Moment) {
+  if (ph === shownPhase) return;
+  shownPhase = ph;
+  const title = $('c-title');
+  title.textContent = ph.label;
+  title.classList.remove('swap'); void title.offsetWidth; title.classList.add('swap');
+  $('pp-when').textContent = ph === BEFORE ? 'Saturday 7 September 1940, afternoon' : `${clock(ph.t)} · ${dayOf(ph.t)}`;
+  $('pp-detail').textContent = ph.detail;
+  const src = ph.src ? SOURCES[ph.src as keyof typeof SOURCES] : null;
+  $('pp-src').innerHTML = src ? `Source: <a href="${src.url}">${SRC_NAME[ph.src!]}</a>` : '';
+}
+
 // ---------------------------------------------------------------- clock
 function updateClock() {
   const s = tally(incidents.filter((i) => shown.has(i.type)), T);
   $('c-time').textContent = clock(T);
   $('c-day').textContent = dayOf(T);
-  const ph = phase(T);
-  $('c-phase').innerHTML = ph ? `<b>${ph.label}</b> ${ph.detail}` : 'Before the raid.';
+  showPhase(phase(T) ?? BEFORE);
   $('c-count').innerHTML = `<b>${s.total}</b> incident${s.total === 1 ? '' : 's'} logged`;
   $('c-types').innerHTML = TYPES.filter((t) => s[t.key] > 0 && shown.has(t.key))
     .map((t) => `<span><i style="background:${t.color}"></i>${s[t.key]} ${t.short.toLowerCase()}</span>`).join('');
@@ -183,8 +199,17 @@ function pause() {
   document.body.classList.remove('playing');
 }
 playBtn.addEventListener('click', () => (playing ? pause() : play()));
+
+// ---------------------------------------------------------------- title card
+function leaveCover() { document.body.classList.remove('at-cover'); }
+$('cv-start').addEventListener('click', () => { leaveCover(); T = 0; lastT = 0; render(); setTimeout(play, 500); });
+$('cv-all').addEventListener('click', () => { leaveCover(); T = SPAN; lastT = T; render(); });
 document.addEventListener('keydown', (e) => {
-  if (e.key === ' ' && !(e.target as HTMLElement).closest('input,button,[role=slider]')) { e.preventDefault(); playing ? pause() : play(); }
+  if (e.key === ' ' && !(e.target as HTMLElement).closest('input,button,[role=slider]')) {
+    e.preventDefault();
+    if (document.body.classList.contains('at-cover')) $('cv-start').click();
+    else if (playing) pause(); else play();
+  }
 });
 $('speed').querySelectorAll<HTMLButtonElement>('button').forEach((b) => b.addEventListener('click', () => {
   speed = +b.dataset.speed!;
@@ -233,7 +258,7 @@ function showIncident(id: number | null) {
     <p class="meta">Log entry ${i.id} of ${records} · ${i.borough ? esc(i.borough) : 'London'}</p>
     <h2><span class="t">${i.time}</span><span class="d">${i.day === 'Sun 8 Sep' ? 'Sunday 8 September' : 'Saturday 7 September'}${i.loggedTime ? ` · corrected; logged as ${i.loggedTime}` : ''}</span> ${esc(i.address)}</h2>
     ${i.timeNote ? `<p class="warn">${esc(i.timeNote)}</p>` : ''}
-    <p class="chip" style="--c:${t.color}"><i></i>${t.label}${i.typeRaw && i.typeRaw !== '—' ? ` <span>(logged as “${esc(i.typeRaw)}”)</span>` : ''}</p>
+    <p class="chip" style="--c:${t.color}"><i></i>${t.label}</p>
     <blockquote>${i.damage ? esc(i.damage) : '<em>No details recorded.</em>'}</blockquote>
     <p class="small">London Fire Brigade record. ${PLACED[i.precision]}${i.note ? ' ' + esc(i.note) : ''}</p>
     ${same.length ? `<h3>${same.length} more at this spot</h3><ul class="same">${same.map((s) =>
@@ -320,5 +345,5 @@ map.on('load', async () => {
   render();
   document.body.classList.add('ready');
   // test hook for the screenshot script
-  (window as unknown as { __firstNight: unknown }).__firstNight = { setTime: (m: number) => { T = m; render(); }, select };
+  (window as unknown as { __firstNight: unknown }).__firstNight = { setTime: (m: number) => { leaveCover(); T = m; render(); }, select: (id: number, fly?: boolean) => { leaveCover(); select(id, fly); } };
 });

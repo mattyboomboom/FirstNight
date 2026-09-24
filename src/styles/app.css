@@ -33,11 +33,14 @@ button{font:inherit;color:inherit}
 /* The clock: the one loud element */
 #clock{position:fixed;left:clamp(16px,3vw,40px);top:calc(env(safe-area-inset-top,0px) + clamp(12px,2.4vh,28px));z-index:3;pointer-events:none}
 #clock::before{content:"";position:absolute;inset:-60px -110px -50px -60px;background:radial-gradient(ellipse at 30% 40%,rgba(12,16,19,.7),rgba(12,16,19,0) 70%);z-index:-1}
-#clock .kicker{margin:0 0 .25em;font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-dim)}
-#c-time{font-family:var(--stencil);font-weight:800;font-size:clamp(68px,11vw,148px);line-height:.82;font-variant-numeric:tabular-nums;text-shadow:0 0 2px rgba(12,16,19,.9),0 2px 24px rgba(12,16,19,.6)}
-body.playing #c-time{color:#fff4dc}
-#c-phase{margin:.45em 0 0;font-size:14.5px;line-height:1.35;max-width:320px;color:var(--ink);text-shadow:0 1px 8px #000,0 0 2px #000}
-#c-phase b{font-family:var(--stencil);font-weight:800;font-size:17px;letter-spacing:.03em;text-transform:uppercase;color:var(--fire);margin-right:.35em}
+/* the stage of the raid is the headline; the time sits under it */
+#c-title{margin:0;font-family:var(--stencil);font-weight:800;font-size:clamp(52px,7.4vw,112px);line-height:.84;letter-spacing:.005em;max-width:min(58vw,640px);text-transform:uppercase;text-shadow:0 0 2px rgba(12,16,19,.9),0 2px 24px rgba(12,16,19,.6)}
+#c-title.swap{animation:swap .7s cubic-bezier(.2,.8,.3,1)}
+@keyframes swap{0%{opacity:0;transform:translateY(-10px);filter:blur(4px)}100%{opacity:1;transform:none;filter:none}}
+#c-when{margin:.45em 0 0;display:flex;align-items:baseline;gap:.6em;text-shadow:0 1px 8px #000}
+#c-time{font-family:var(--stencil);font-weight:800;font-size:clamp(26px,2.4vw,34px);line-height:1;color:var(--fire);font-variant-numeric:tabular-nums}
+#c-day{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+body.playing #c-time{color:#ffc766}
 #c-count{margin:.4em 0 .2em;font-size:15px;color:var(--ink-dim);text-shadow:0 1px 8px #000}
 #c-count b{font-family:var(--stencil);font-weight:800;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
 #c-types{margin:0;display:flex;flex-wrap:wrap;gap:.2em 1em;font-size:13.5px;color:var(--ink-dim);max-width:330px;text-shadow:0 1px 8px #000;font-variant-numeric:tabular-nums}
@@ -50,6 +53,7 @@ body.has-sel #panel{border-left-color:var(--ink)}
 #brand{font-family:var(--stencil);font-weight:800;font-size:clamp(44px,4.4vw,64px);line-height:.9;margin:0 0 .35em;letter-spacing:.01em}
 #panel p{font-size:16px;line-height:1.55;margin:0 0 .9em}
 #panel .lede{font-size:17.5px}
+#p-intro .howto{margin-top:1.4em;padding-top:1em;border-top:1px solid var(--rule)}
 #panel .small,#panel .meta{font-size:13.5px;color:var(--ink-dim);line-height:1.45}
 #panel .meta{margin-bottom:.4em}
 #p-incident h2{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.25;margin:0 0 .6em}
@@ -106,10 +110,10 @@ blockquote{margin:0 0 1em;padding:.6em 0 .6em 1em;border-left:2px solid var(--ru
 /* Phones: panel becomes a sheet above the timeline */
 @media (max-width:760px){
   :root{--panel-w:100vw;--bar-h:70px}
-  #clock .kicker{font-size:12px}
+  #c-title{font-size:clamp(38px,11vw,56px);max-width:62vw}
+  #c-when{flex-direction:column;align-items:flex-start;gap:.15em}
+  #c-day{font-size:11px}
   #c-types{display:none}
-  #c-phase{font-size:13px;max-width:60vw}
-  #c-phase b{font-size:15px}
   #panel{left:8px;right:8px;width:auto;top:auto;max-height:44vh;bottom:calc(var(--bar-h) + 8px);border-left:0;border-top:4px solid var(--fire)}
   body.has-sel #panel{border-top-color:var(--ink)}
   #panel:not(:has(#p-incident:not([hidden]))){max-height:30vh}
@@ -161,3 +165,22 @@ body.page{overflow:auto}
 @keyframes shake{0%,100%{transform:none}20%{transform:translate(2px,-1px)}40%{transform:translate(-2px,1px)}60%{transform:translate(1px,2px)}80%{transform:translate(-1px,-1px)}}
 @media (prefers-reduced-motion:reduce){#skyglow{display:none}#map.shake{animation:none}}
 #ticks span.end{transform:translateX(-100%)}
+
+/* Title card, before the night starts */
+#cover{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;
+  background:radial-gradient(ellipse 80% 70% at 50% 55%,rgba(18,23,27,.55),rgba(12,16,19,.94) 75%);transition:opacity .8s,visibility 0s}
+body:not(.at-cover) #cover{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .8s,visibility 0s .8s}
+.cv-inner{max-width:40rem;text-align:center}
+#cover .kicker{font-size:13.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);margin:0 0 1.2em}
+#cv-title{margin:0;font-family:var(--stencil);font-weight:800;font-size:clamp(60px,10vw,132px);line-height:.84;letter-spacing:.005em;text-transform:uppercase;text-shadow:0 0 40px rgba(224,68,44,.35),0 4px 40px rgba(0,0,0,.6)}
+.cv-date{font-family:var(--stencil);font-weight:600;font-size:clamp(24px,2.6vw,34px);letter-spacing:.08em;color:var(--fire);margin:.45em 0 .9em}
+.cv-lede{font-size:clamp(16.5px,1.4vw,19px);line-height:1.55;color:var(--ink);margin:0 auto 1.8em;max-width:34rem}
+.cv-go{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn{font-family:var(--serif);font-size:16px;font-weight:600;border-radius:3px;padding:.75em 1.3em;cursor:pointer;border:1px solid rgba(239,233,218,.6);background:transparent;color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--fire);border-color:var(--fire);color:#1a1208;box-shadow:0 0 30px rgba(232,169,60,.35)}
+.btn.primary:hover{filter:brightness(1.08)}
+.cv-about{margin-top:1.6em;font-size:14px}
+.cv-about a{color:var(--ink-dim)}
+body.at-cover #clock,body.at-cover #panel,body.at-cover #legend,body.at-cover #bar,body.at-cover .maplibregl-control-container{opacity:0;pointer-events:none}
+#clock,#panel,#legend,#bar{transition:opacity .8s .3s}

@@ -23,7 +23,10 @@ async function shot(name, viewport, act) {
   await page.close();
 }
 
-await shot('desktop-all-day', { width: 1440, height: 900 });
+await shot('desktop-cover', { width: 1440, height: 900 });
+await shot('phone-cover', { width: 390, height: 844 });
+await shot('desktop-all-day', { width: 1440, height: 900 }, (p) => p.evaluate(() => window.__firstNight.setTime(840)));
+await shot('desktop-before', { width: 1440, height: 900 }, (p) => p.evaluate(() => window.__firstNight.setTime(20)));
 await shot('desktop-1805-selected', { width: 1440, height: 900 }, (p) =>
   p.evaluate(() => { window.__firstNight.setTime(125); window.__firstNight.select(300, true); }));
 await shot('phone-1805', { width: 390, height: 844 }, (p) => p.evaluate(() => window.__firstNight.setTime(125)));

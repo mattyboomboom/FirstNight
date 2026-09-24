@@ -7,10 +7,9 @@ const historic = import.meta.env.PUBLIC_HISTORIC_TILES ?? '';
 ---
 <div id="map" data-src={withBase('data/first-night.geojson')} data-basemap={withBase('basemap/london.pmtiles')} data-places={withBase('data/places.json')} data-historic={historic} aria-label="Map of London"></div>
 
-<header id="clock" aria-live="off">
-  <p class="kicker" id="c-day">Saturday 7 September 1940</p>
-  <div id="c-time">16:00</div>
-  <p id="c-phase"></p>
+<header id="clock" aria-live="polite">
+  <h2 id="c-title">Before the raid</h2>
+  <p id="c-when"><span id="c-time">16:00</span> <span id="c-day">Saturday 7 September 1940</span></p>
   <p id="c-count"><b>0</b> incidents logged</p>
   <p id="c-types"></p>
 </header>
@@ -19,14 +18,31 @@ const historic = import.meta.env.PUBLIC_HISTORIC_TILES ?? '';
   <button id="p-close" class="icon" aria-label="Close details" hidden>×</button>
   <div id="p-scroll">
     <section id="p-intro">
-      <h1 id="brand">First Night</h1>
-      <p class="lede">On Saturday 7 September 1940 the Luftwaffe turned from the RAF's airfields to London. This map plays back every fire and bomb incident the London Fire Brigade logged in that first raid, <span id="n-records">832</span> of them, minute by minute, from the afternoon attack on the docks to dawn on Sunday.</p>
-      <p>Press play, or drag along the timeline. The marks on the timeline show the sirens, the all clears and the start of the night raid. Tap any point to read the Fire Brigade's own note on what it found.</p>
-      <p class="small">Most points are placed on the street named in the log, not the exact building. Hollow rings could only be placed on a district. <a href={withBase('about/')}>About the data</a></p>
+      <p class="meta" id="pp-when"></p>
+      <p class="lede" id="pp-detail"></p>
+      <p class="small" id="pp-src"></p>
+      <div class="howto">
+        <p class="small">Press play, or drag along the timeline. The diamonds mark the sirens, the all clears and the start of the night raid. Tap any point to read the Fire Brigade's own note on what it found.</p>
+        <p class="small">Most points are placed on the street named in the log, not the exact building. Hollow rings could only be placed on a district. <a href={withBase('about/')}>About the data</a></p>
+      </div>
     </section>
     <section id="p-incident" hidden></section>
   </div>
 </aside>
+
+<section id="cover" aria-labelledby="cv-title">
+  <div class="cv-inner">
+    <p class="kicker">London · The London Fire Brigade's log</p>
+    <h1 id="cv-title">First Night<br />of the Blitz</h1>
+    <p class="cv-date">7 September 1940</p>
+    <p class="cv-lede">That Saturday afternoon the Luftwaffe turned from the RAF's airfields to London. This map plays back every fire and bomb incident the London Fire Brigade logged in that first raid, <span id="n-records">832</span> of them, from the first sirens to dawn on Sunday.</p>
+    <div class="cv-go">
+      <button id="cv-start" class="btn primary">Start the night <span aria-hidden="true">▶</span></button>
+      <button id="cv-all" class="btn">See the whole night</button>
+    </div>
+    <p class="cv-about"><a href={withBase('about/')}>About the data</a></p>
+  </div>
+</section>
 
 <div id="legend" role="group" aria-label="Show bomb types">
   {TYPES.map((t) => (

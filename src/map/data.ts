@@ -86,6 +86,13 @@ export const RAID: Moment[] = [
   { t: at(4, 30, 1), label: 'All clear', detail: 'The last raiders turn for home. The night raid has lasted over eight hours.', src: 'lm' }
 ];
 
+/** Shown before the sirens. */
+export const BEFORE: Moment = {
+  t: 0, label: 'Before the raid',
+  detail: 'Radar stations on the coast have picked up a huge formation building over France. At 16:25 the first wave, about a hundred aircraft, crosses the Kent coast.',
+  src: 'bob'
+};
+
 /** Where the raid stands at minute t: the last moment passed. */
 export function phase(t: number): Moment | null {
   let cur: Moment | null = null;
