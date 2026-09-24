@@ -1,0 +1,12 @@
+{
+  "53":  { "latlon": [51.5445, -0.0262], "borough": "Hackney", "note": "Placed by hand on Prince Edward Road, Hackney Wick (was geocoded to Basildon)." },
+  "255": { "latlon": [51.5168, -0.0238], "borough": "Tower Hamlets", "note": "Placed by hand on Thomas Road, E14 (was geocoded to High Wycombe)." },
+  "608": { "latlon": [51.4458, -0.1196], "borough": "Lambeth", "note": "Placed by hand on Keymer Road, SW2 (was geocoded to West Sussex)." },
+  "609": { "latlon": [51.4437, -0.1178], "borough": "Lambeth", "note": "Placed by hand on Faygate Road, SW2 (was geocoded to Horsham)." },
+  "625": { "unlocated": true, "note": "'Sheffield House, 3, 5 and 7' gives no street or district; was geocoded to Sheffield." },
+  "679": { "latlon": [51.5262, -0.0398], "borough": "Tower Hamlets", "note": "Placed by hand on Longfellow Road, E3 (was geocoded to Gillingham)." },
+  "693": { "latlon": [51.4752, -0.0985], "borough": "Southwark", "note": "Recorded as 'County Grove SW5'; placed on County Grove, Camberwell SE5, which fits the Lambeth Borough Council note. Was geocoded to Kent." },
+  "694": { "latlon": [51.4752, -0.0985], "borough": "Southwark", "note": "As #693: County Grove, Camberwell SE5." },
+  "695": { "latlon": [51.5262, -0.0398], "borough": "Tower Hamlets", "note": "Placed by hand on Longfellow Road, E3 (was geocoded to Gillingham)." },
+  "798": { "latlon": [51.5214, -0.1569], "borough": "Westminster", "note": "Placed by hand on Baker Street, W1 (was geocoded to Bedfordshire)." }
+}

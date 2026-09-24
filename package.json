@@ -1,0 +1,33 @@
+{
+  "name": "firstnight",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "npm run data",
+    "dev": "astro dev",
+    "build": "npm run data && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node scripts/build-data.mjs && vitest run",
+    "data": "node scripts/build-data.mjs",
+    "shots": "node scripts/shoot.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.3.4",
+    "maplibre-gl": "^5.0.0",
+    "pmtiles": "^4.5.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^22.20.4",
+    "csv-parse": "^6.0.0",
+    "playwright": "^1.56.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

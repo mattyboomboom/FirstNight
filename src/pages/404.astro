@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
+import '../styles/app.css';
+---
+<Base title="Not found · First Night" description="Page not found." path="404/" bodyClass="page">
+<main><h1>Not found</h1><p><a href={withBase('')}>Back to the map</a></p></main>
+</Base>

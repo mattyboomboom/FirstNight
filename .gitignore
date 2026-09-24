@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.env
+tests/shots/
+public/data/first-night.geojson
+.basemap-work/

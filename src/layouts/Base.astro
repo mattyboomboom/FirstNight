@@ -1,0 +1,39 @@
+---
+// Document shell shared by every page: metadata, fonts, icon.
+import '../styles/fonts.css';
+import { withBase } from '../lib/url';
+import { SITE_NAME } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Site-relative path of this page, e.g. "about/" ("" for the home page) */
+  path: string;
+  bodyClass?: string;
+}
+const { title, description, path, bodyClass } = Astro.props;
+const site = Astro.site ?? new URL('http://localhost:4321');
+const canonical = new URL(withBase(path), site).href;
+---
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="canonical" href={canonical}>
+<meta name="theme-color" content="#12171b">
+<link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content={SITE_NAME}>
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:url" content={canonical}>
+<meta property="og:locale" content="en_GB">
+<slot name="head" />
+</head>
+<body class={bodyClass}>
+<slot />
+</body>
+</html>

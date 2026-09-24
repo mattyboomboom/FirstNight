@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
+import { SITE_NAME } from '../lib/site';
+import '../styles/app.css';
+import { RAID, SOURCES, clock } from '../map/data';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// Figures on this page are read from the built data, so they never drift.
+const geo = JSON.parse(readFileSync(join(process.cwd(), 'public/data/first-night.geojson'), 'utf8'));
+const feats: { properties: { precision: string } }[] = geo.features;
+const n = (p: string) => feats.filter((f) => f.properties.precision === p).length;
+---
+<Base title={`About the data · ${SITE_NAME}`} description="Where the First Night incident data comes from, how it was placed on the map, and its limits." path="about/" bodyClass="page">
+<main>
+  <p><a class="back" href={withBase('')}>← Back to the map</a></p>
+  <h1>About the data</h1>
+  <p>This is a proof of concept for a larger map of the London Blitz. Its main source is the London Fire Brigade's log of every incident it attended in the first raid of the Blitz, on Saturday 7 and Sunday 8 September 1940.</p>
+
+  <h2>The log</h2>
+  <p>The log has {geo.meta.records} entries. Each gives the time, the address as the firemen wrote it, the type of bomb, and a short note on the damage. Dimensions in the notes are in feet. The types are: IB, incendiary bomb; EB, explosive bomb; COB, crude oil bomb.</p>
+  <p>The Guardian Datablog published the log in full, and it has circulated as a public spreadsheet since. We show the addresses and notes exactly as recorded, spelling mistakes and all. Only the bomb types are grouped, so that variants such as “EB &amp; IB” and “IB and EB” count as one.</p>
+  <p>The log's times run from 00:08 to 23:59 but carry no date. We read it as one raid rather than one calendar day: the entries from 16:14 onwards are the Saturday afternoon and evening, and those before 16:00 belong to Sunday 8 September: the early hours, while the night raid went on, and the morning after. A local historian reading the same records places the Catford bombs at 00:18 and 00:20 in the early hours of Sunday (<a href="https://runner500.wordpress.com/2020/09/03/the-first-night-of-the-blitz-in-lee-hither-green-catford-and-lewisham/">Running Past</a>). So the timeline runs for 24 hours from 16:00 on the Saturday.</p>
+  <p>A few times don't fit. Fourteen entries come after the all clear at 04:30 on the Sunday; these may be fires or unexploded bombs found that morning. Twelve entries for Woolwich Arsenal are logged at 14:55, but other accounts put that attack at about 17:15 on the Saturday. We show the times as logged and flag these in the details.</p>
+
+  <h2>The course of the raid</h2>
+  <p>The diamonds on the timeline mark these moments, taken from published accounts rather than from the log.</p>
+  <table>
+    <tr><th>Time</th><th>What happened</th><th>Source</th></tr>
+    {RAID.map((m) => (
+      <tr><td>{clock(m.t)}</td><td><b>{m.label}.</b> {m.detail}</td><td>{m.src && <a href={SOURCES[m.src as keyof typeof SOURCES].url}>{m.src === 'lm' ? 'London Museum' : 'Battle of Britain timeline'}</a>}</td></tr>
+    ))}
+  </table>
+
+  <h2>Placing it on the map</h2>
+  <p>The log has addresses, not coordinates. The coordinates come from Enrico Spinielli's 2012 project <a href="https://github.com/espinielli/theblitz">theblitz</a>, which geocoded the same {geo.meta.records} rows with OpenStreetMap's Nominatim and Google's geocoder, and placed some by hand from a 1908 map. We fixed the rows that repo had stored with latitude and longitude swapped, and placed by hand the ones it had matched to a street of the same name outside London.</p>
+  <table>
+    <tr><th>Placement</th><th>Entries</th><th>On the map</th></tr>
+    <tr><td>On the street named in the log</td><td>{n('street')}</td><td>Solid dot</td></tr>
+    <tr><td>On the district only</td><td>{n('district')}</td><td>Hollow ring</td></tr>
+    <tr><td>By hand from a 1908 map (street gone)</td><td>{n('approx')}</td><td>Solid dot</td></tr>
+    <tr><td>By hand, fixing a wrong match</td><td>{n('manual')}</td><td>Solid dot</td></tr>
+    <tr><td>Could not be placed</td><td>{geo.meta.unlocated.length}</td><td>Not shown</td></tr>
+  </table>
+  <p>No point marks the exact building. Where several entries share one address or one district, they are spread in a small spiral so each can be clicked. London's streets have changed a great deal since 1940, and some of the matches will be wrong. The list of entries worth checking by hand is kept with the source files.</p>
+
+  <h2>Credits</h2>
+  <ul>
+    <li>Incident log: London Fire Brigade records, published by the Guardian Datablog.</li>
+    <li>Geocoding: Enrico Spinielli, <a href="https://github.com/espinielli/theblitz">github.com/espinielli/theblitz</a>.</li>
+    <li>Base map: drawn from © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL), via the <a href="https://download.geofabrik.de/">Geofabrik</a> Greater London extract, and hosted with the site. It shows London's streets today, not in 1940: the Surrey Commercial Docks, for example, have mostly been filled in since.</li>
+    <li>Course of the raid: <a href={SOURCES.lm.url}>{SOURCES.lm.title}</a>; <a href={SOURCES.bob.url}>{SOURCES.bob.title}</a>.</li>
+    <li>Further reading: Peter Stansky, <cite>The First Day of the Blitz</cite> (Yale University Press, 2007).</li>
+  </ul>
+  <p>This is a non-commercial, educational project.</p>
+</main>
+</Base>

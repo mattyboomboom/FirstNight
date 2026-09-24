@@ -1,0 +1,49 @@
+---
+// The map page markup: map canvas, clock, legend, info panel and timeline.
+// Everything is wired up in src/map/main.ts.
+import { withBase } from '../lib/url';
+import { TYPES } from '../map/data';
+const historic = import.meta.env.PUBLIC_HISTORIC_TILES ?? '';
+---
+<div id="map" data-src={withBase('data/first-night.geojson')} data-basemap={withBase('basemap/london.pmtiles')} data-places={withBase('data/places.json')} data-historic={historic} aria-label="Map of London"></div>
+
+<header id="clock" aria-live="off">
+  <p class="kicker" id="c-day">Saturday 7 September 1940</p>
+  <div id="c-time">16:00</div>
+  <p id="c-phase"></p>
+  <p id="c-count"><b>0</b> incidents logged</p>
+  <p id="c-types"></p>
+</header>
+
+<aside id="panel" aria-label="Details">
+  <button id="p-close" class="icon" aria-label="Close details" hidden>×</button>
+  <div id="p-scroll">
+    <section id="p-intro">
+      <h1 id="brand">First Night</h1>
+      <p class="lede">On Saturday 7 September 1940 the Luftwaffe turned from the RAF's airfields to London. This map plays back every fire and bomb incident the London Fire Brigade logged in that first raid, <span id="n-records">843</span> of them, minute by minute, from the afternoon attack on the docks to the early hours of Sunday.</p>
+      <p>Press play, or drag along the timeline. The marks on the timeline show the sirens, the all clears and the start of the night raid. Tap any point to read the Fire Brigade's own note on what it found.</p>
+      <p class="small">Most points are placed on the street named in the log, not the exact building. Hollow rings could only be placed on a district. <a href={withBase('about/')}>About the data</a></p>
+    </section>
+    <section id="p-incident" hidden></section>
+  </div>
+</aside>
+
+<div id="legend" role="group" aria-label="Show bomb types">
+  {TYPES.map((t) => (
+    <label><input type="checkbox" value={t.key} checked /><i style={`background:${t.color}`}></i>{t.short}</label>
+  ))}
+  <label class="base" hidden><input type="checkbox" id="historic" />1940s map</label>
+</div>
+
+<footer id="bar">
+  <button id="play" class="icon play" aria-label="Play">▶</button>
+  <div id="track" role="slider" tabindex="0" aria-label="Time of day" aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0">
+    <svg id="hist" preserveAspectRatio="none"></svg>
+    <div id="moments"></div>
+    <div id="head"><span></span></div>
+    <div id="ticks"></div>
+  </div>
+  <div id="speed" role="group" aria-label="Playback speed">
+    <button data-speed="4">1×</button><button data-speed="12" class="on">3×</button><button data-speed="36">9×</button>
+  </div>
+</footer>

@@ -1,0 +1,46 @@
+
+89: 41 Windmill Lane, Deptford, Se8, London, UK
+    (51.4893,-0.0369) ,  P25 in http://mapco.net/bart1908/bart38b.htm
+    no more existing road, was opposite Scawen Rd with respect to Evelyn St towards Grove St
+
+125: 35 Colwick Street, Deptford SE8, London, UK 
+    (51.4895, -0.0387), P 25 in http://mapco.net/bart1908/bart38b.htm
+    today is Rainsbourough Avenue, Deptford SE8, London
+
+203: Surrey Commercial Docks, SE16, London, UK
+    (51.5034, -0.0351) N-O 25 in http://mapco.net/bart1908/bart38b.htm
+
+218: Swedish yard, Surrey Commercial Docks, SE16, London, UK
+    (51.4933, -0.0384) maybe what today is Sweden Gate
+
+224: 12 Jewel Street, Stepney E1, London, UK
+    approx to E1 --> (51.5159, -0.0477)
+
+273: North Atlantic Import Shed, Finland Yard, Surrey Commercial Docks, SE16, London, UK
+    approx -> (51.5034, -0.0351)
+
+366: Methodist Church, Stebondale Street, Cubitt Town E14.
+     151-163 Stebondale Street Cubitt Town E14.
+     100-124 Stebondale Street Cubitt Town E14, London, UK
+    (51.4897, -0.0088)
+
+403: 24 Maria Street, Millwall E14, London, UK
+    approx E14 -> (51.5097, -0.0176)
+
+507: 26 Ely Terrace, Stepney E1, London, UK
+    approx to Stepney -> (51.516, -0.048)
+
+526: Canadian Produce Warehouse, Swedish Yard, Surrey Commercial Docks, SE16, London, UK
+    approx -> (51.5034, -0.0351)
+
+541: Canada yard, Surrey Commercial Docks, SE16, London, UK
+    approx -> (51.5034, -0.0351)
+
+563: Canada yard, Surrey Commercial Docks, SE16, London, UK
+    approx -> (51.5034, -0.0351)
+
+668: 41 Church Road, Brixton, SW2, London, UK
+    approx --> (51.4452, -0.1095)
+
+835: 41-47 Abernethy Road, Lee SE12, London, UK
+    approx SE12 -> (51.446, 0.018)
