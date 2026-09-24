@@ -33,10 +33,16 @@ for (const [k, v] of Object.entries(JSON.parse(readFileSync(src('time-notes.json
   const [a, b = a] = k.split('-').map(Number);
   for (let i = a; i <= b; i++) timeNotes.set(i, v);
 }
+// time-fixes.json: corrected times for entries whose logged time is wrong
+const timeFixes = new Map();
+for (const [k, v] of Object.entries(JSON.parse(readFileSync(src('time-fixes.json'), 'utf8')))) {
+  if (k.startsWith('_')) continue;
+  const [a, b = a] = k.split('-').map(Number);
+  for (let i = a; i <= b; i++) timeFixes.set(i, v);
+}
 const ALL_CLEAR = 4 * 60 + 30; // 04:30 on Sunday 8 September
 // The timeline stops at 06:00 on the Sunday. Later entries (fires and bombs
-// found during the day, and the Arsenal entries logged at 14:55) are kept out
-// of the map and listed in meta.later.
+// found during the day) are kept out of the map and listed in meta.later.
 const END = 6 * 60;
 const later = [];
 const approxOrders = new Set(
@@ -80,20 +86,22 @@ rows.forEach((r, i) => {
   const id = +order;
   const g = drops[i];
   if (g.order !== id) throw new Error(`row ${i}: order ${id} != geocode ${g.order}`);
-  const [hh, mm] = time.split(':').map(Number);
+  const tf = timeFixes.get(id);
+  const [hh, mm] = (tf ? tf.at : time).split(':').map(Number);
   // The log covers one raid, not one calendar day: it runs from the afternoon
   // attack on Saturday 7 September through the night raid into Sunday 8th.
   // Times before 16:00 are read as the Sunday, so t counts minutes from 16:00
   // on the Saturday.
   const clockMin = hh * 60 + mm;
-  const sunday = clockMin < START;
+  const sunday = tf ? !!tf.sunday : clockMin < START;
   const props = {
     id, time: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`,
     t: sunday ? clockMin + 1440 - START : clockMin - START,
     day: sunday ? 'Sun 8 Sep' : 'Sat 7 Sep',
+    ...(tf ? { loggedTime: time.padStart(5, '0') } : {}),
     address: address.replace(/, London, UK$/, '').replace(/\s+/g, ' '),
     typeRaw: typeRaw || '—', type: bombType(typeRaw), damage,
-    timeNote: timeNotes.get(id) ?? (sunday && clockMin > ALL_CLEAR
+    timeNote: tf?.note ?? timeNotes.get(id) ?? (sunday && clockMin > ALL_CLEAR
       ? 'Logged after the all clear at about 04:30 on Sunday 8 September. It may be a fire or unexploded bomb found later that morning.'
       : undefined),
     borough: null, precision: 'street', check: false

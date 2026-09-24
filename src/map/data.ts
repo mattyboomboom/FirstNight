@@ -7,9 +7,11 @@ export interface Incident {
   id: number;
   /** Minutes after 16:00 on Saturday 7 Sept 1940 (the timeline's start) */
   t: number;
-  /** Time as logged */
+  /** Time shown (as logged, unless corrected) */
   time: string;
   day: string;
+  /** The time as logged, when the time shown has been corrected */
+  loggedTime?: string;
   timeNote?: string;
   address: string;
   typeRaw: string;

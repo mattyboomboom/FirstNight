@@ -1,0 +1,7 @@
+{
+  "_about": "Corrected times, keyed by log entry number or range. The logged time is kept and shown alongside. 'at' is HH:MM on the Saturday (7 Sept) unless 'sunday' is true.",
+  "70-81": {
+    "at": "17:15",
+    "note": "Logged at 14:55 (which would be the Sunday afternoon). Placed at 17:15 on the Saturday, when other accounts say the afternoon raid hit Woolwich Arsenal."
+  }
+}

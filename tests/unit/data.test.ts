@@ -47,7 +47,10 @@ describe('helpers', () => {
   it('reads early-hours entries as Sunday, after the evening ones', () => {
     const first = inc.find((i) => i.id === 1)!; // 00:08
     const last = inc.find((i) => i.id === 843)!; // 23:59
-    expect(geo.meta.later.map((l: { id: number }) => l.id)).toContain(81); // Arsenal, logged 14:55
+    const arsenal = inc.find((i) => i.id === 81)!; // logged 14:55, corrected to 17:15 Saturday
+    expect(arsenal.time).toBe('17:15');
+    expect(arsenal.loggedTime).toBe('14:55');
+    expect(arsenal.day).toBe('Sat 7 Sep');
     expect(first.day).toBe('Sun 8 Sep');
     expect(first.t).toBeGreaterThan(last.t);
   });

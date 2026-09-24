@@ -231,7 +231,7 @@ function showIncident(id: number | null) {
   const same = incidents.filter((x) => x.shared === i.shared && x.id !== i.id);
   box.innerHTML = `
     <p class="meta">Log entry ${i.id} of ${records} · ${i.borough ? esc(i.borough) : 'London'}</p>
-    <h2><span class="t">${i.time}</span><span class="d">${i.day === 'Sun 8 Sep' ? 'Sunday 8 September' : 'Saturday 7 September'}</span> ${esc(i.address)}</h2>
+    <h2><span class="t">${i.time}</span><span class="d">${i.day === 'Sun 8 Sep' ? 'Sunday 8 September' : 'Saturday 7 September'}${i.loggedTime ? ` · corrected; logged as ${i.loggedTime}` : ''}</span> ${esc(i.address)}</h2>
     ${i.timeNote ? `<p class="warn">${esc(i.timeNote)}</p>` : ''}
     <p class="chip" style="--c:${t.color}"><i></i>${t.label}${i.typeRaw && i.typeRaw !== '—' ? ` <span>(logged as “${esc(i.typeRaw)}”)</span>` : ''}</p>
     <blockquote>${i.damage ? esc(i.damage) : '<em>No details recorded.</em>'}</blockquote>
